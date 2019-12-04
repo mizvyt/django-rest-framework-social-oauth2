@@ -7,7 +7,7 @@ from oauthlib.oauth2.rfc6749.endpoints.token import TokenEndpoint
 from oauthlib.oauth2.rfc6749.tokens import BearerToken
 from oauthlib.oauth2.rfc6749.endpoints.base import catch_errors_and_unavailability
 
-from .oauth2_grants import SocialTokenGrant
+from .oauth2_grants import ConvertAccessTokenGrant, ConvertAuthorizationCodeGrant
 
 log = logging.getLogger(__name__)
 
@@ -33,12 +33,14 @@ class SocialTokenServer(TokenEndpoint):
                        token-, resource-, and revocation-endpoint constructors.
         """
         self._params = {}
-        refresh_grant = SocialTokenGrant(request_validator)
+        convert_code_grant = ConvertAuthorizationCodeGrant(request_validator)
+        convert_token_grant = ConvertAccessTokenGrant(request_validator)
         bearer = BearerToken(request_validator, token_generator,
                              token_expires_in, refresh_token_generator)
         TokenEndpoint.__init__(self, default_grant_type='convert_token',
                                grant_types={
-                                   'convert_token': refresh_grant,
+                                   'convert_code': convert_code_grant,
+                                   'convert_token': convert_token_grant,
                                },
                                default_token_type=bearer)
 
